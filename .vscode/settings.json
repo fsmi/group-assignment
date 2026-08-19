@@ -3,6 +3,7 @@
   "files.trimTrailingWhitespace": true,
   "files.exclude": {
     "**/.venv": true,
+    "**/venv": true,
     "**/.ruff_cache": true,
     "**/__pycache__": true
   },
