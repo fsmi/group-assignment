@@ -1,0 +1,69 @@
+[project]
+name = "group-assignment"
+version = "0.0.0"
+description = "O-Phase Group Assignment Solver"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "click>=8.4.2",
+    "ortools>=9.15.6755",
+    "pydantic>=2.13.4",
+    "rich>=15.0.0",
+]
+
+[project.scripts]
+group-assignment = "group_assignment.cli:cli"
+
+[build-system]
+requires = ["uv_build>=0.12.2,<0.13"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = ["prek>=0.4.12", "pyrefly>=1.2.0", "ruff>=0.15.10"]
+
+[tool.ruff.lint]
+select = [
+    "ERA",
+    "ANN",
+    "BLE",
+    "B",
+    "A",
+    "C4",
+    "T10",
+    "FIX",
+    "ISC",
+    "ICN",
+    "LOG",
+    "G010",
+    "INP",
+    "PIE",
+    "T20",
+    "PYI",
+    "Q",
+    "RSE",
+    "RET",
+    "SLF",
+    "SIM",
+    "ARG",
+    "PTH",
+    "FLY",
+    "I",
+    #"C90",  TODO: fix issues
+    "N",
+    "PERF",
+    "E",
+    "W",
+    #"D", TODO: fix issues
+    "F",
+    "PGH",
+    "PL",
+    "UP",
+    "FURB",
+    "RUF",
+    "TRY",
+]
+ignore = ["TRY003"]
+
+[tool.pyrefly]
+preset = "strict"
+treat-all-caps-as-final = true

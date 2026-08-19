@@ -1,0 +1,27 @@
+[cost]
+base = 3
+non_tsa_students_factor = 1.5
+
+[constraints]
+min_num_students = [
+  # course type + degree type
+  { types = [{ course_type = "info", degree_type = "bachelor" }], min = 0 },
+  { types = [{ course_type = "info", degree_type = "master" }], min = 7 },
+  { types = [{ course_type = "compsci", degree_type = "master" }], min = 5 },
+  { types = [{ course_type = "mathe", degree_type = "bachelor" }], min = 6 },
+  { types = [{ course_type = "mathe", degree_type = "master" }], min = 7 },
+  { types = [{ course_type = "cds", degree_type = "bachelor" }], min = 6 },
+  { types = [{ course_type = "lehramt", degree_type = "bachelor" }], min = 3 },
+  { types = [{ course_type = "lehramt", degree_type = "master" }], min = 0 },
+
+  # degree type only
+  { types = [{ degree_type = "bachelor" }], min = 0 },
+  { types = [{ degree_type = "master" }], min = 0 },
+
+  # course type only
+  { types = [{ course_type = "info" }], min = 0 },
+  { types = [{ course_type = "mathe" }], min = 0 },
+  { types = [{ course_type = "lehramt" }], min = 0 },
+]
+min_size_factor = 1.0
+capacity_factor = 1.0
