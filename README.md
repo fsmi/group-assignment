@@ -29,7 +29,7 @@ uv run group-assignment [COMMAND] --help
 To reproduce the results of a past year run
 
 ```bash
-uv run group-assignment assign -i data/XXX_input.json -o data/XXX_output.json -c data/XXX_config.toml
+uv run group-assignment assign -i data/XXX_input.json -o data/XXX_assignment.json -c data/XXX_config.toml
 ```
 
 ## Development
