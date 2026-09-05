@@ -72,7 +72,7 @@ class InputSchema(BaseModel):
             raise ValueError(f"No rating for team {teams_without_ratings.pop()}")
 
         # validate that each rating is for a known team
-        unknown_teams_with_rating = set(self.teams.keys()) - set(self.ratings.keys())
+        unknown_teams_with_rating = set(self.ratings.keys()) - set(self.teams.keys())
         if unknown_teams_with_rating:
             raise ValueError(
                 f"Rating for unknown team {unknown_teams_with_rating.pop()}"
