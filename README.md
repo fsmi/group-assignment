@@ -15,7 +15,7 @@ uv sync
 The cli tool is then available as
 
 ```bash
-uv run group-assignment ...
+uv run group-assignment
 ```
 
 ## Usage
