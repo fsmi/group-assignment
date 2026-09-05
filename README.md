@@ -42,10 +42,10 @@ Run them manually:
 uv run prek run --all-files
 ```
 
-Note that the project's venv needs to be activated for that to succeed.
-
-To install the git hooks, so that the checks run before each commit, run
+To install a git hook, so that they run automatically before each commit, run
 
 ```bash
 uv run prek install
 ```
+
+Note that the project's venv needs to be activated when committing for the hook to succeed.
