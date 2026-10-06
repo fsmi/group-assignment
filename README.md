@@ -32,6 +32,38 @@ To reproduce the results of a past year run
 uv run group-assignment assign -i data/XXX_input.json -o data/XXX_assignment.json -c data/XXX_config.toml
 ```
 
+## File Formats
+
+### Input (`-i`)
+
+```text
+{
+  "groups": {
+    <group_id>: {
+      "name": str,
+      "capacity": int,
+      "min_size": int,
+      "course_type": "info" | "compsci" | "mathe" | "cds" | "lehramt" | "any",
+      "degree_type": "bachelor" | "master" | "any"
+    }
+  },
+  "students": {
+    <student_id>: {
+      "name": str,
+      "course_type": "info" | "compsci" | "mathe" | "cds" | "lehramt",
+      "degree_type": "bachelor" | "master",
+      "type_specific_assignment": bool
+    }
+  },
+  "teams": {
+    <team_id>: [<student_id>]           // each student in exactly one team
+  },
+  "ratings": {                          // exactly one rating per team
+    <team_id>: {<group_id>: int}        // score per group, lower = higher priority; not all groups have to be rated
+  }
+}
+```
+
 ## Development
 
 This project uses [prek](https://github.com/j178/prek) to run checks and formatters.
