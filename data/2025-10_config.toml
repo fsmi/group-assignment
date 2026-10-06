@@ -23,5 +23,9 @@ min_num_students = [
   { types = [{ course_type = "mathe" }], min = 0 },
   { types = [{ course_type = "lehramt" }], min = 0 },
 ]
-min_size_factor = 1.0
+
+[constraints.group_size]
+min_factor = 1.0
+min_size = 0
+min_capacity_factor = 0.0
 capacity_factor = 1.0

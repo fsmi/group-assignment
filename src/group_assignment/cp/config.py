@@ -19,12 +19,39 @@ class MinNumStudents:
 
 
 @dataclass(frozen=True)
+class GroupSize:
+    min_factor: float
+    min_size: int
+    min_capacity_factor: float
+    capacity_factor: float
+
+    def __post_init__(self) -> None:
+        self._validate()
+
+    def _validate(self) -> None:
+        if self.min_factor < 0:
+            raise ValueError(
+                f"GroupSize: min_factor must be >= 0 (got {self.min_factor})"
+            )
+        if self.min_size < 0:
+            raise ValueError(f"GroupSize: min_size must be >= 0 (got {self.min_size})")
+        if self.min_capacity_factor < 0:
+            raise ValueError(
+                f"GroupSize: min_capacity_factor must be >= 0 "
+                f"(got {self.min_capacity_factor})"
+            )
+        if self.capacity_factor <= 0:
+            raise ValueError(
+                f"GroupSize: capacity_factor must be > 0 (got {self.capacity_factor})"
+            )
+
+
+@dataclass(frozen=True)
 class Config:
     cost_base: int
     non_tsa_students_factor: float
     min_num_students: tuple[MinNumStudents, ...]
-    min_size_factor: float
-    capacity_factor: float
+    group_size: GroupSize
 
     def __post_init__(self) -> None:
         self._validate()
@@ -36,12 +63,4 @@ class Config:
             raise ValueError(
                 f"Config: non_tsa_students_factor must be >= 1 "
                 f"(got {self.non_tsa_students_factor})"
-            )
-        if self.min_size_factor < 0:
-            raise ValueError(
-                f"Config: min_size_factor must be >= 0 (got {self.min_size_factor})"
-            )
-        if self.capacity_factor <= 0:
-            raise ValueError(
-                f"Config: capacity_factor must be > 0 (got {self.capacity_factor})"
             )

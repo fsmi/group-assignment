@@ -53,8 +53,15 @@ class CP:
             group_size = sum(
                 t.size * x[(t.id, g.id)] for t in inp.teams if g in t.rating
             )
-            model.add(group_size <= math.floor(g.capacity * config.capacity_factor))
-            model.add(group_size >= math.ceil(g.min_size * config.min_size_factor))
+            model.add(
+                group_size <= math.floor(g.capacity * config.group_size.capacity_factor)
+            )
+            min_size = max(
+                math.ceil(g.min_size * config.group_size.min_factor),
+                config.group_size.min_size,
+                math.ceil(g.capacity * config.group_size.min_capacity_factor),
+            )
+            model.add(group_size >= min_size)
 
         # minimum number of students of each set of types in each group
         for constraint in config.min_num_students:
