@@ -64,6 +64,14 @@ uv run group-assignment assign -i data/XXX_input.json -o data/XXX_assignment.jso
 }
 ```
 
+### Output (`-o`)
+
+```text
+{
+  <team_id>: <group_id>                 // every team is assigned to exactly one group
+}
+```
+
 ## Development
 
 This project uses [prek](https://github.com/j178/prek) to run checks and formatters.
