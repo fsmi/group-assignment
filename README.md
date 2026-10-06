@@ -36,7 +36,7 @@ uv run group-assignment assign -i data/XXX_input.json -o data/XXX_assignment.jso
 
 ### Input (`-i`)
 
-```text
+```json
 {
   "groups": {
     <group_id>: {
@@ -66,7 +66,7 @@ uv run group-assignment assign -i data/XXX_input.json -o data/XXX_assignment.jso
 
 ### Output (`-o`)
 
-```text
+```json
 {
   <team_id>: <group_id>                 // every team is assigned to exactly one group
 }
