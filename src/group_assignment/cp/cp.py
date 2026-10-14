@@ -4,11 +4,12 @@ import logging
 import math
 import time
 from collections.abc import Mapping
+from fractions import Fraction
 from typing import Self
 
 from ortools.sat.python import cp_model
 
-from group_assignment.datatypes import GroupID, TeamID
+from group_assignment.datatypes import GroupID, TeamID, TypeSelector
 from group_assignment.model import Input, Student
 
 from .config import Config
@@ -96,6 +97,27 @@ class CP:
 
                 model.add(count_of_types >= constraint.min).OnlyEnforceIf(
                     has_tsa_students_of_types
+                )
+
+        # minimum share of students of each degree type in each group that accepts
+        # this degree type
+        for constraint in config.min_degree_type_shares:
+            min_share = Fraction(str(constraint.min))
+            selector = TypeSelector(degree_type=constraint.degree_type)
+            for g in inp.groups:
+                if not g.degree_type.accepts(constraint.degree_type):
+                    continue
+                group_size = sum(
+                    t.size * x[(t.id, g.id)] for t in inp.teams if g in t.rating
+                )
+                count_of_degree_type = sum(
+                    x[(t.id, g.id)] * t.num_students(selector)
+                    for t in inp.teams
+                    if g in t.rating
+                )
+                model.add(
+                    min_share.denominator * count_of_degree_type
+                    >= min_share.numerator * group_size
                 )
 
         # ==== OBJECTIVE ====

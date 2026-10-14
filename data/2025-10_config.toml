@@ -23,6 +23,10 @@ min_num_students = [
   { types = [{ course_type = "mathe" }], min = 0 },
   { types = [{ course_type = "lehramt" }], min = 0 },
 ]
+min_degree_type_shares = [
+  { degree_type = "bachelor", min = 0.0 },
+  { degree_type = "master", min = 0.0 },
+]
 
 [constraints.group_size]
 min_factor = 1.0

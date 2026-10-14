@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from group_assignment.datatypes import TypeSelector
+from group_assignment.datatypes import DegreeType, TypeSelector
 
 
 @dataclass(frozen=True)
@@ -16,6 +16,21 @@ class MinNumStudents:
             raise ValueError("MinNumStudents: types must contain at least one selector")
         if self.min < 0:
             raise ValueError(f"MinNumStudents: min must be >= 0 (got {self.min})")
+
+
+@dataclass(frozen=True)
+class MinDegreeTypeShare:
+    degree_type: DegreeType
+    min: float
+
+    def __post_init__(self) -> None:
+        self._validate()
+
+    def _validate(self) -> None:
+        if not 0 <= self.min <= 1:
+            raise ValueError(
+                f"MinDegreeTypeShare: min must be in [0, 1] (got {self.min})"
+            )
 
 
 @dataclass(frozen=True)
@@ -51,6 +66,7 @@ class Config:
     cost_base: int
     non_tsa_students_factor: float
     min_num_students: tuple[MinNumStudents, ...]
+    min_degree_type_shares: tuple[MinDegreeTypeShare, ...]
     group_size: GroupSize
 
     def __post_init__(self) -> None:
