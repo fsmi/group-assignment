@@ -135,7 +135,8 @@ def build_same_type_assignment_table(
     students = "TSA students" if tsa_only else "Students"
     table = Table(
         title=f"# {students} by # students of their type in their group",
-        show_lines=True,
+        # alternating background to separate rows
+        row_styles=["", "on grey19"],
     )
     table.add_column("Types", style="bold")
     for i in range(1, width + 1):
