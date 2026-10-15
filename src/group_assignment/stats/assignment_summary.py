@@ -23,6 +23,9 @@ from .assignment_stats import (
     count_students_by_type_count_in_groups,
 )
 
+# scores from which on an assignment is shown as bad (red)
+MIN_BAD_SCORE = 2
+
 
 def print_assignment_summary(
     inp: Input, assignment: Assignment, config: Config | None = None
@@ -58,6 +61,12 @@ def build_acc_scores_table(inp: Input, assignment: Assignment) -> Table:
     for score in scores:
         table.add_column(f"{score}", justify="right")
 
+    def fmt(score: int, count: int) -> Text | str:
+        # students with a bad score are shown in red
+        if score >= MIN_BAD_SCORE and count > 0:
+            return Text(str(count), style="red")
+        return str(count)
+
     def add_rows(
         label: str,
         course_type: CourseType | None,
@@ -74,11 +83,13 @@ def build_acc_scores_table(inp: Input, assignment: Assignment) -> Table:
             table.add_row(
                 label if i == 0 else "",
                 Text(str(tsa).lower(), style="not bold"),
-                *(str(counts[score]) for score in scores),
+                *(fmt(score, counts[score]) for score in scores),
                 style=style,
             )
 
-    table.add_row("all", "", *(str(scores[score]) for score in scores), style="bold")
+    table.add_row(
+        "all", "", *(fmt(score, scores[score]) for score in scores), style="bold"
+    )
     add_rows("", None, None, style="bold")
     table.add_section()
 
