@@ -8,7 +8,12 @@ from rich.text import Text
 
 from group_assignment.cp import Config
 from group_assignment.cp.config import MinNumStudents
-from group_assignment.datatypes import TypeSelector
+from group_assignment.datatypes import (
+    INVALID_COURSE_DEGREE_COMBINATIONS,
+    CourseType,
+    DegreeType,
+    TypeSelector,
+)
 from group_assignment.model import Assignment, Input, Student
 
 from .assignment_stats import (
@@ -46,35 +51,50 @@ def print_assignment_summary(
 
 def build_acc_scores_table(inp: Input, assignment: Assignment) -> Table:
     scores = aggregate_assignment_scores(inp, assignment)
-    scores_tsa_false = aggregate_assignment_scores(
-        inp, assignment, Student.Selector(type_specific_assignment=False)
-    )
-    scores_tsa_true = aggregate_assignment_scores(
-        inp, assignment, Student.Selector(type_specific_assignment=True)
-    )
 
     table = Table(title="Scores")
-    table.add_column("Score", style="bold", justify="right")
-    table.add_column("# Students", justify="right")
-    table.add_column(
-        "tsa=False",
-        justify="right",
-        style="grey50",
-        header_style="grey50",
-    )
-    table.add_column(
-        "tsa=True",
-        justify="right",
-        style="grey50",
-        header_style="grey50",
-    )
-
+    table.add_column("Types")
+    table.add_column("TSA")
     for score in scores:
-        table.add_row(
-            f"{score}",
-            str(scores[score]),
-            str(scores_tsa_false[score]),
-            str(scores_tsa_true[score]),
+        table.add_column(f"{score}", justify="right")
+
+    def add_rows(
+        label: str,
+        course_type: CourseType | None,
+        degree_type: DegreeType | None,
+        style: str,
+    ) -> None:
+        # one row each for non-TSA and TSA students
+        for i, tsa in enumerate((False, True)):
+            counts = aggregate_assignment_scores(
+                inp,
+                assignment,
+                Student.Selector(course_type, degree_type, tsa),
+            )
+            table.add_row(
+                label if i == 0 else "",
+                Text(str(tsa).lower(), style="not bold"),
+                *(str(counts[score]) for score in scores),
+                style=style,
+            )
+
+    table.add_row("all", "", *(str(scores[score]) for score in scores), style="bold")
+    add_rows("", None, None, style="bold")
+    table.add_section()
+
+    # alternating background per course/degree type
+    types = [
+        (course_type, degree_type)
+        for course_type in CourseType
+        for degree_type in DegreeType
+        if (course_type, degree_type) not in INVALID_COURSE_DEGREE_COMBINATIONS
+    ]
+    for i, (course_type, degree_type) in enumerate(types):
+        add_rows(
+            f"{course_type.value} {degree_type.value}",
+            course_type,
+            degree_type,
+            style="" if i % 2 == 0 else "on grey19",
         )
 
     return table
