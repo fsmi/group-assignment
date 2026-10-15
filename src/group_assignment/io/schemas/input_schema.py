@@ -1,7 +1,7 @@
 from collections import defaultdict
 from typing import Self
 
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, ConfigDict, model_validator
 
 from group_assignment.datatypes import (
     CourseType,
@@ -16,6 +16,8 @@ from group_assignment.datatypes import (
 
 
 class Group(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     name: str
     capacity: int
     min_size: int
@@ -24,6 +26,8 @@ class Group(BaseModel):
 
 
 class Student(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     name: str
     course_type: CourseType
     degree_type: DegreeType
@@ -37,6 +41,8 @@ Rating = dict[GroupID, Score]
 
 
 class InputSchema(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     groups: dict[GroupID, Group]
     students: dict[StudentID, Student]
     teams: dict[TeamID, Team]
