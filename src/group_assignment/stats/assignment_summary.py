@@ -104,7 +104,11 @@ def build_group_stats_table(inp: Input, assignment: Assignment) -> Table:
     students_by_group = count_students_by_group(inp, assignment)
     scores_by_group = aggregate_assignment_scores_by_group(inp, assignment)
 
-    table = Table(title="Assignment")
+    table = Table(
+        title="Assignment",
+        # alternating background to separate rows
+        row_styles=["", "on grey19"],
+    )
     table.add_column("Group", style="bold")
     table.add_column("Course Type", style="grey50", header_style="grey50")
     table.add_column("Degree Type", style="grey50", header_style="grey50")
