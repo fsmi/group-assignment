@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import math
 import time
-from collections.abc import Mapping
+from collections.abc import Collection, Mapping
 from fractions import Fraction
 from typing import Self
 
@@ -12,7 +12,7 @@ from ortools.sat.python import cp_model
 from group_assignment.datatypes import GroupID, TeamID, TypeSelector
 from group_assignment.model import Input, Student
 
-from .config import Config
+from .config import Config, MinNumStudents
 
 logger = logging.getLogger(__name__)
 
@@ -64,40 +64,49 @@ class CP:
             )
             model.add(group_size >= min_size)
 
-        # minimum number of students of each set of types in each group
-        for constraint in config.min_num_students:
-            tsa_selectors = frozenset(
-                Student.Selector.from_type_selector(
-                    selector, type_specific_assignment=True
-                )
-                for selector in constraint.types
-            )
-
+        def add_min_num_students(
+            constraint: MinNumStudents,
+            trigger_selectors: Collection[TypeSelector | Student.Selector],
+        ) -> None:
+            # each group with students matching trigger_selectors needs at least
+            # constraint.min students of constraint.types
             for g in inp.groups:
                 count_of_types = sum(
                     x[(t.id, g.id)] * t.num_students(constraint.types)
                     for t in inp.teams
                     if g in t.rating
                 )
-                count_of_tsa_students_of_types = sum(
-                    x[(t.id, g.id)] * t.num_students(tsa_selectors)
+                count_of_triggering_students = sum(
+                    x[(t.id, g.id)] * t.num_students(trigger_selectors)
                     for t in inp.teams
                     if g in t.rating
                 )
 
-                has_tsa_students_of_types = model.new_bool_var(
-                    f"has_tsa_students_of_types[({g.id},{constraint.types})]"
+                is_triggered = model.new_bool_var(
+                    f"is_triggered[({g.id},{constraint.types})]"
                 )
-                model.add(count_of_tsa_students_of_types > 0).OnlyEnforceIf(
-                    has_tsa_students_of_types
-                )
-                model.add(count_of_tsa_students_of_types <= 0).OnlyEnforceIf(
-                    has_tsa_students_of_types.Not()
+                model.add(count_of_triggering_students > 0).OnlyEnforceIf(is_triggered)
+                model.add(count_of_triggering_students <= 0).OnlyEnforceIf(
+                    is_triggered.Not()
                 )
 
-                model.add(count_of_types >= constraint.min).OnlyEnforceIf(
-                    has_tsa_students_of_types
+                model.add(count_of_types >= constraint.min).OnlyEnforceIf(is_triggered)
+
+        # minimum number of students of each set of types in each group with
+        # TSA students of these types
+        for constraint in config.min_num_students_tsa:
+            tsa_selectors = frozenset(
+                Student.Selector.from_type_selector(
+                    selector, type_specific_assignment=True
                 )
+                for selector in constraint.types
+            )
+            add_min_num_students(constraint, tsa_selectors)
+
+        # minimum number of students of each set of types in each group with
+        # any students of these types
+        for constraint in config.min_num_students_all:
+            add_min_num_students(constraint, constraint.types)
 
         # minimum share of students of each degree type in each group that accepts
         # this degree type

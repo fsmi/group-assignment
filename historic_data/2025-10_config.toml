@@ -4,7 +4,7 @@ non_tsa_students_factor = 1.5 # weight of non-TSA students
 
 [constraints]
 # TSA students get >= min students of their types in their group
-min_num_students = [
+min_num_students_tsa = [
   # course type + degree type
   { types = [{ course_type = "info", degree_type = "bachelor" }], min = 0 },
   { types = [{ course_type = "info", degree_type = "master" }], min = 7 },
@@ -24,6 +24,8 @@ min_num_students = [
   { types = [{ course_type = "mathe" }], min = 0 },
   { types = [{ course_type = "lehramt" }], min = 0 },
 ]
+# all students get >= min students of their types in their group
+min_num_students_all = []
 # min share of students of a degree type in each group accepting it
 min_degree_type_shares = [
   { degree_type = "bachelor", min = 0.0 },

@@ -52,7 +52,8 @@ class GroupSizeSchema(BaseModel):
 class ConstraintsSchema(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    min_num_students: list[MinNumStudentsSchema]
+    min_num_students_tsa: list[MinNumStudentsSchema]
+    min_num_students_all: list[MinNumStudentsSchema]
     min_degree_type_shares: list[MinDegreeTypeShareSchema]
     group_size: GroupSizeSchema
 
@@ -67,8 +68,11 @@ class ConfigSchema(BaseModel):
         return Config(
             cost_base=self.cost.base,
             non_tsa_students_factor=self.cost.non_tsa_students_factor,
-            min_num_students=tuple(
-                e.to_config() for e in self.constraints.min_num_students
+            min_num_students_tsa=tuple(
+                e.to_config() for e in self.constraints.min_num_students_tsa
+            ),
+            min_num_students_all=tuple(
+                e.to_config() for e in self.constraints.min_num_students_all
             ),
             min_degree_type_shares=tuple(
                 e.to_config() for e in self.constraints.min_degree_type_shares

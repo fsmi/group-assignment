@@ -65,7 +65,8 @@ class GroupSize:
 class Config:
     cost_base: int
     non_tsa_students_factor: float
-    min_num_students: tuple[MinNumStudents, ...]
+    min_num_students_tsa: tuple[MinNumStudents, ...]
+    min_num_students_all: tuple[MinNumStudents, ...]
     min_degree_type_shares: tuple[MinDegreeTypeShare, ...]
     group_size: GroupSize
 
