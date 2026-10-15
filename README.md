@@ -51,7 +51,7 @@ uv run group-assignment assign -i data/XXX_input.json -o data/XXX_assignment.jso
     <student_id>: {
       "name": str,
       "course_type": "info" | "compsci" | "mathe" | "cds" | "lehramt",
-      "degree_type": "bachelor" | "master",
+      "degree_type": "bachelor" | "master", // invalid: compsci bachelor
       "type_specific_assignment": bool
     }
   },

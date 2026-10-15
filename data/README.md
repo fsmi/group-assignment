@@ -12,6 +12,8 @@ Data from past years.
 - [2024-10_input.json](2024-10_input.json)
   - Some students had `any` as their degree type -> set to `bachelor`
   - Master students per group are limited in a hacky way by creating each group twice with different degree types -> [2024-10_input_mod.json](2024-10_input_mod.json) merges these back into single groups
+- [2025-10_input.json](2025-10_input.json)
+  - One student had `compsci` `bachelor`, which was not a valid course/degree combination at the time -> set to `master`
 - [2025-10_assignment.json](2025-10_assignment.json)
   - Not exactly reproducible with the current codebase because of a solver version mismatch
 

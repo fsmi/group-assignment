@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from typing import Self, cast
 
 from group_assignment.datatypes import (
+    INVALID_COURSE_DEGREE_COMBINATIONS,
     CourseType,
     DegreeType,
     GroupCourseType,
@@ -52,6 +53,16 @@ class Student:
     course_type: CourseType = field(compare=False)
     degree_type: DegreeType = field(compare=False)
     type_specific_assignment: bool = field(compare=False)
+
+    def __post_init__(self) -> None:
+        self._validate()
+
+    def _validate(self) -> None:
+        if (self.course_type, self.degree_type) in INVALID_COURSE_DEGREE_COMBINATIONS:
+            raise ValueError(
+                f"Student {self.id}: invalid combination of course_type and "
+                f"degree_type (got {self.course_type.value} {self.degree_type.value})"
+            )
 
     def accepted_by(self, group: Group) -> bool:
         return self.course_type.accepted_by(
@@ -186,35 +197,16 @@ class Input:
             for gid, g in io_model.groups.items()
         }
 
-        students: dict[StudentID, Student] = {}
-        for sid, s in io_model.students.items():
-            if s.course_type == CourseType.CDS and s.degree_type == DegreeType.MASTER:
-                logger.warning(
-                    f"Student {sid} has invalid combination "
-                    f"{CourseType.CDS.value} {DegreeType.MASTER.value} "
-                    f"-> assuming {DegreeType.BACHELOR.value}"
-                )
-                degree_type = DegreeType.BACHELOR
-            elif (
-                s.course_type == CourseType.COMPSCI
-                and s.degree_type == DegreeType.BACHELOR
-            ):
-                logger.warning(
-                    f"Student {sid} has invalid combination "
-                    f"{CourseType.COMPSCI.value} {DegreeType.BACHELOR.value} "
-                    f"-> assuming {DegreeType.MASTER.value}"
-                )
-                degree_type = DegreeType.MASTER
-            else:
-                degree_type = s.degree_type
-
-            students[sid] = Student(
+        students: dict[StudentID, Student] = {
+            sid: Student(
                 id=sid,
                 name=s.name,
                 course_type=s.course_type,
-                degree_type=degree_type,
+                degree_type=s.degree_type,
                 type_specific_assignment=s.type_specific_assignment,
             )
+            for sid, s in io_model.students.items()
+        }
 
         def normalize_rating(rating: dict[Group, Score]) -> dict[Group, Score]:
             unique_scores = sorted(set(rating.values()))

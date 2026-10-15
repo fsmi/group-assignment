@@ -52,6 +52,16 @@ class GroupDegreeType(StrEnum):
         return self == GroupDegreeType.ANY or self.value == degree_type.value
 
 
+# course and degree type combinations that do not exist and are rejected in input
+INVALID_COURSE_DEGREE_COMBINATIONS: frozenset[tuple[CourseType, DegreeType]] = (
+    frozenset(
+        {
+            (CourseType.COMPSCI, DegreeType.BACHELOR),
+        }
+    )
+)
+
+
 @dataclass(frozen=True)
 class TypeSelector:
     course_type: CourseType | None = None
