@@ -27,6 +27,13 @@ from .assignment_stats import (
 MIN_BAD_SCORE = 2
 
 
+def _fmt_score_count(score: int, count: int) -> Text | str:
+    # students with a bad score are shown in red
+    if score >= MIN_BAD_SCORE and count > 0:
+        return Text(str(count), style="red")
+    return str(count)
+
+
 def print_assignment_summary(
     inp: Input, assignment: Assignment, config: Config | None = None
 ) -> None:
@@ -61,12 +68,6 @@ def build_acc_scores_table(inp: Input, assignment: Assignment) -> Table:
     for score in scores:
         table.add_column(f"{score}", justify="right")
 
-    def fmt(score: int, count: int) -> Text | str:
-        # students with a bad score are shown in red
-        if score >= MIN_BAD_SCORE and count > 0:
-            return Text(str(count), style="red")
-        return str(count)
-
     def add_rows(
         label: str,
         course_type: CourseType | None,
@@ -83,12 +84,15 @@ def build_acc_scores_table(inp: Input, assignment: Assignment) -> Table:
             table.add_row(
                 label if i == 0 else "",
                 Text(str(tsa).lower(), style="not bold"),
-                *(fmt(score, counts[score]) for score in scores),
+                *(_fmt_score_count(score, counts[score]) for score in scores),
                 style=style,
             )
 
     table.add_row(
-        "all", "", *(fmt(score, scores[score]) for score in scores), style="bold"
+        "all",
+        "",
+        *(_fmt_score_count(score, scores[score]) for score in scores),
+        style="bold",
     )
     add_rows("", None, None, style="bold")
     table.add_section()
@@ -154,7 +158,10 @@ def build_group_stats_table(inp: Input, assignment: Assignment) -> Table:
             str(students_by_group[group.id]),
             utilization,
         ]
-        row.extend(str(scores_by_group[score][group.id]) for score in scores_by_group)
+        row.extend(
+            _fmt_score_count(score, scores_by_group[score][group.id])
+            for score in scores_by_group
+        )
         table.add_row(*row)
 
     return table
