@@ -6,29 +6,38 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
-from group_assignment.datatypes import (
-    CourseType,
-    DegreeType,
-    TypeSelector,
-)
+from group_assignment.cp import Config
+from group_assignment.cp.config import MinNumStudents
+from group_assignment.datatypes import TypeSelector
 from group_assignment.model import Assignment, Input, Student
 
 from .assignment_stats import (
     aggregate_assignment_scores,
     aggregate_assignment_scores_by_group,
     count_students_by_group,
-    count_tsa_students_by_type_count_in_groups,
+    count_students_by_type_count_in_groups,
 )
 
 
-def print_assignment_summary(inp: Input, assignment: Assignment) -> None:
-    tables = Group(
-        Align.center(Padding(build_acc_scores_table(inp, assignment), (1, 0, 1, 0))),
-        Align.center(Padding(build_group_stats_table(inp, assignment), (1, 0, 1, 0))),
-        Align.center(build_same_type_assignment_table(inp, assignment)),
-    )
+def print_assignment_summary(
+    inp: Input, assignment: Assignment, config: Config | None = None
+) -> None:
+    tables = [
+        build_acc_scores_table(inp, assignment),
+        build_group_stats_table(inp, assignment),
+    ]
+    if config is not None:
+        tables.extend(
+            build_same_type_assignment_table(inp, assignment, constraints, tsa_only)
+            for constraints, tsa_only in (
+                (config.min_num_students_tsa, True),
+                (config.min_num_students_all, False),
+            )
+            if constraints
+        )
+    # blank line above each table
     panel = Panel(
-        tables,
+        Group(*(Align.center(Padding(table, (1, 0, 0, 0))) for table in tables)),
         title="Assignment",
         expand=False,
     )
@@ -116,11 +125,19 @@ def build_group_stats_table(inp: Input, assignment: Assignment) -> Table:
     return table
 
 
-def build_same_type_assignment_table(inp: Input, assignment: Assignment) -> Table:
+def build_same_type_assignment_table(
+    inp: Input,
+    assignment: Assignment,
+    constraints: tuple[MinNumStudents, ...],
+    tsa_only: bool,
+) -> Table:
     width = 20
-    table = Table(title="# Students with same type assigned to groups")
-    table.add_column("Course", style="bold")
-    table.add_column("Degree", style="bold")
+    students = "TSA students" if tsa_only else "Students"
+    table = Table(
+        title=f"# {students} by # students of their type in their group",
+        show_lines=True,
+    )
+    table.add_column("Types", style="bold")
     for i in range(1, width + 1):
         table.add_column(f"{i}", justify="right")
     table.add_column(f"≥{width + 1}", justify="right")
@@ -128,51 +145,22 @@ def build_same_type_assignment_table(inp: Input, assignment: Assignment) -> Tabl
     def fmt(n: int) -> Text | str:
         return Text(str(n), style="red") if n > 0 else str(n)
 
-    for course in CourseType:
-        for degree in DegreeType:
-            counts = count_tsa_students_by_type_count_in_groups(
-                inp, assignment, TypeSelector(course, degree)
-            )
-            row: list[Text | str] = [course.value, degree.value]
-            row.extend(fmt(counts.get(i, 0)) for i in range(1, width + 1))
-            row.append(
-                str(
-                    sum(
-                        counts.get(i, 0)
-                        for i in range(width + 1, max(counts.keys(), default=width) + 1)
-                    )
-                )
-            )
-            table.add_row(*row)
-
-    table.add_section()
-
-    for degree in DegreeType:
-        counts = count_tsa_students_by_type_count_in_groups(
-            inp, assignment, TypeSelector(degree_type=degree)
+    def type_parts(selector: TypeSelector) -> tuple[str, str]:
+        return (
+            selector.course_type.value if selector.course_type else "",
+            selector.degree_type.value if selector.degree_type else "",
         )
-        row = ["", degree.value]
-        for i in range(1, width + 1):
-            row.append(fmt(counts.get(i, 0)))
-        row.append(
-            str(
-                sum(
-                    counts.get(i, 0)
-                    for i in range(width + 1, max(counts.keys(), default=width) + 1)
-                )
-            )
-        )
-        table.add_row(*row)
 
-    table.add_section()
-
-    for course in CourseType:
-        counts = count_tsa_students_by_type_count_in_groups(
-            inp, assignment, TypeSelector(course_type=course)
+    for constraint in constraints:
+        types = "\n".join(
+            " ".join(part for part in parts if part)
+            for parts in sorted(map(type_parts, constraint.types))
         )
-        row = [course.value, ""]
-        for i in range(1, width + 1):
-            row.append(fmt(counts.get(i, 0)))
+        counts = count_students_by_type_count_in_groups(
+            inp, assignment, constraint.types, tsa_only
+        )
+        row: list[Text | str] = [types]
+        row.extend(fmt(counts.get(i, 0)) for i in range(1, width + 1))
         row.append(
             str(
                 sum(

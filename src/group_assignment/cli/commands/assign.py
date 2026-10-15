@@ -71,6 +71,6 @@ def assign(
     validate_output(input_schema, output_schema)
     write_output_file(output_path, output_schema)
 
-    print_assignment_summary(inp, ass)
+    print_assignment_summary(inp, ass, config)
     if detailed:
         print_group_assignment_summary(inp, ass)

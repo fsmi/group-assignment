@@ -1,5 +1,5 @@
 from collections import defaultdict
-from collections.abc import Mapping
+from collections.abc import Collection, Mapping
 
 from group_assignment.datatypes import (
     CourseType,
@@ -47,23 +47,28 @@ def aggregate_assignment_scores_by_group(
     return student_count_by_group_by_score
 
 
-def count_tsa_students_by_type_count_in_groups(
-    inp: Input, assignment: Assignment, selector: TypeSelector
+def count_students_by_type_count_in_groups(
+    inp: Input,
+    assignment: Assignment,
+    types: Collection[TypeSelector],
+    tsa_only: bool,
 ) -> Mapping[int, int]:
+    # number of students of these types (only TSA ones if tsa_only) by the number
+    # of students of these types (TSA or not) in their group
+    counted_selectors = frozenset(
+        Student.Selector.from_type_selector(
+            selector, type_specific_assignment=True if tsa_only else None
+        )
+        for selector in types
+    )
     r: dict[int, int] = defaultdict(int)
     for group in inp.groups:
-        num_tsa_students = assignment.num_students_assigned_to_group(
-            group,
-            Student.Selector.from_type_selector(
-                selector, type_specific_assignment=True
-            ),
+        num_counted_students = assignment.num_students_assigned_to_group(
+            group, counted_selectors
         )
-        num_type_specific_students = assignment.num_students_assigned_to_group(
-            group,
-            Student.Selector.from_type_selector(selector),
-        )
-        if num_tsa_students > 0:
-            r[num_type_specific_students] += num_tsa_students
+        num_students_of_types = assignment.num_students_assigned_to_group(group, types)
+        if num_counted_students > 0:
+            r[num_students_of_types] += num_counted_students
     return r
 
 
