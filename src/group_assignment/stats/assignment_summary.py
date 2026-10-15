@@ -28,8 +28,8 @@ def print_assignment_summary(
     inp: Input, assignment: Assignment, config: Config | None = None
 ) -> None:
     tables = [
-        build_acc_scores_table(inp, assignment),
         build_group_stats_table(inp, assignment),
+        build_acc_scores_table(inp, assignment),
     ]
     if config is not None:
         tables.extend(
