@@ -23,6 +23,10 @@ def count_students_by_type(
     return student_counts
 
 
+def count_tsa_students(inp: Input) -> int:
+    return sum(1 for student in inp.students if student.type_specific_assignment)
+
+
 def aggregate_ratings_by_groups(inp: Input) -> dict[Score, dict[GroupID, int]]:
     scores = sorted({score for team in inp.teams for score in team.rating.values()})
     scores_by_group = {score: {group.id: 0 for group in inp.groups} for score in scores}

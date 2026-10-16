@@ -1,6 +1,6 @@
 import rich
 from rich.align import Align
-from rich.console import Group
+from rich.console import Group, RenderableType
 from rich.padding import Padding
 from rich.panel import Panel
 from rich.table import Table
@@ -12,6 +12,7 @@ from group_assignment.model import Input
 from .input_stats import (
     aggregate_ratings_by_groups,
     count_students_by_type,
+    count_tsa_students,
     sum_group_capacities,
     sum_group_min_sizes,
 )
@@ -35,12 +36,18 @@ def print_input_summary(data: Input) -> None:
     students_tables = Table.grid(padding=(0, 4))
     students_tables.add_row(students_table, not_fluent_table)
 
-    tables = Group(
-        Align.center(Padding(students_tables, (1, 0, 1, 0))),
-        Align.center(groups_table),
-    )
+    renderables: list[RenderableType] = [students_tables]
+    num_students = sum(1 for _ in data.students)
+    if num_students > 0:
+        tsa_share = count_tsa_students(data) / num_students
+        renderables.append(
+            Text(f"Students with TSA: {tsa_share:.0%}", style="bright_white")
+        )
+    renderables.append(groups_table)
+
+    # blank line above each element
     panel = Panel(
-        tables,
+        Group(*(Align.center(Padding(r, (1, 0, 0, 0))) for r in renderables)),
         title="Input",
         expand=False,
     )
