@@ -40,7 +40,11 @@ def _build_groups_table(data: Input) -> Table:
     ratings = aggregate_ratings_by_groups(data)
     scores = sorted(ratings.keys())
 
-    table = Table(title="Groups and Ratings")
+    table = Table(
+        title="Groups and Ratings",
+        # alternating background to separate rows
+        row_styles=["", "on grey19"],
+    )
     table.add_column("Group", style="bold")
     table.add_column("Course Type")
     table.add_column("Degree Type")
@@ -73,6 +77,6 @@ def _build_groups_table(data: Input) -> Table:
         *([""] * 3),
         str(sum_group_min_sizes(data)),
         str(sum_group_capacities(data)),
-        style="grey50 bold",
+        style="grey50 bold on default",
     )
     return table
