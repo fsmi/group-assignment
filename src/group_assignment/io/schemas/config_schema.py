@@ -2,7 +2,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from group_assignment.cp import Config
 from group_assignment.cp.config import GroupSize, MinDegreeTypeShare, MinNumStudents
-from group_assignment.datatypes import DegreeType, TypeSelector
+from group_assignment.datatypes import DegreeType, StudentTypeSelector
 
 
 class CostSchema(BaseModel):
@@ -15,7 +15,7 @@ class CostSchema(BaseModel):
 class MinNumStudentsSchema(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    types: frozenset[TypeSelector] = Field(min_length=1)
+    types: frozenset[StudentTypeSelector] = Field(min_length=1)
     min: int = Field(ge=0)
 
     def to_config(self) -> MinNumStudents:

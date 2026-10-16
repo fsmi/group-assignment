@@ -52,6 +52,7 @@ uv run group-assignment assign -i historic_data/XXX_input.json -o data/XXX_assig
       "name": str,
       "course_type": "info" | "compsci" | "mathe" | "cds" | "lehramt",
       "degree_type": "bachelor" | "master", // invalid: compsci bachelor
+      "not_fluent_in_german": bool,     // optional, default: false
       "type_specific_assignment": bool
     }
   },

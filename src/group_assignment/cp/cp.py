@@ -9,7 +9,7 @@ from typing import Self
 
 from ortools.sat.python import cp_model
 
-from group_assignment.datatypes import GroupID, TeamID, TypeSelector
+from group_assignment.datatypes import GroupID, StudentTypeSelector, TeamID
 from group_assignment.model import Input, Student
 
 from .config import Config, MinNumStudents
@@ -66,7 +66,7 @@ class CP:
 
         def add_min_num_students(
             constraint: MinNumStudents,
-            trigger_selectors: Collection[TypeSelector | Student.Selector],
+            trigger_selectors: Collection[StudentTypeSelector | Student.Selector],
         ) -> None:
             # each group with students matching trigger_selectors needs at least
             # constraint.min students of constraint.types
@@ -112,7 +112,7 @@ class CP:
         # this degree type
         for constraint in config.min_degree_type_shares:
             min_share = Fraction(str(constraint.min))
-            selector = TypeSelector(degree_type=constraint.degree_type)
+            selector = StudentTypeSelector(degree_type=constraint.degree_type)
             for g in inp.groups:
                 if not g.degree_type.accepts(constraint.degree_type):
                     continue

@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 
-from group_assignment.datatypes import DegreeType, TypeSelector
+from group_assignment.datatypes import DegreeType, StudentTypeSelector
 
 
 @dataclass(frozen=True)
 class MinNumStudents:
-    types: frozenset[TypeSelector]
+    types: frozenset[StudentTypeSelector]
     min: int
 
     def __post_init__(self) -> None:

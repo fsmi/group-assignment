@@ -31,6 +31,7 @@ class Student(BaseModel):
     name: str
     course_type: CourseType
     degree_type: DegreeType
+    not_fluent_in_german: bool = False
     type_specific_assignment: bool
 
 

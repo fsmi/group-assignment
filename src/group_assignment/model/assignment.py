@@ -3,7 +3,7 @@ from collections.abc import Collection, Mapping
 from dataclasses import dataclass
 from typing import Self
 
-from group_assignment.datatypes import GroupID, TeamID, TypeSelector
+from group_assignment.datatypes import GroupID, StudentTypeSelector, TeamID
 from group_assignment.io import OutputSchema
 
 from .input import Group, Input, Student, Team
@@ -37,9 +37,9 @@ class Assignment:
     def num_students_assigned_to_group(
         self,
         group: Group,
-        selector: TypeSelector
+        selector: StudentTypeSelector
         | Student.Selector
-        | Collection[TypeSelector | Student.Selector],
+        | Collection[StudentTypeSelector | Student.Selector],
     ) -> int:
         return sum(
             t.num_students(selector) for t, g in self._assignment.items() if g == group

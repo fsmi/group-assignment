@@ -6,7 +6,7 @@ from group_assignment.datatypes import (
     DegreeType,
     GroupID,
     Score,
-    TypeSelector,
+    StudentTypeSelector,
 )
 from group_assignment.model import Assignment, Input, Student
 
@@ -50,7 +50,7 @@ def aggregate_assignment_scores_by_group(
 def count_students_by_type_count_in_groups(
     inp: Input,
     assignment: Assignment,
-    types: Collection[TypeSelector],
+    types: Collection[StudentTypeSelector],
     tsa_only: bool,
 ) -> Mapping[int, int]:
     # number of students of these types (only TSA ones if tsa_only) by the number

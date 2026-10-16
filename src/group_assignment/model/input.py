@@ -14,8 +14,8 @@ from group_assignment.datatypes import (
     GroupID,
     Score,
     StudentID,
+    StudentTypeSelector,
     TeamID,
-    TypeSelector,
 )
 from group_assignment.io import InputSchema
 
@@ -52,6 +52,7 @@ class Student:
     name: str = field(compare=False)
     course_type: CourseType = field(compare=False)
     degree_type: DegreeType = field(compare=False)
+    not_fluent_in_german: bool = field(compare=False)
     type_specific_assignment: bool = field(compare=False)
 
     def __post_init__(self) -> None:
@@ -69,7 +70,7 @@ class Student:
             group.course_type
         ) and self.degree_type.accepted_by(group.degree_type)
 
-    def matches(self, selector: TypeSelector | Student.Selector) -> bool:
+    def matches(self, selector: StudentTypeSelector | Student.Selector) -> bool:
         if (
             selector.course_type is not None
             and self.course_type != selector.course_type
@@ -80,27 +81,34 @@ class Student:
             and self.degree_type != selector.degree_type
         ):
             return False
+        if (
+            selector.not_fluent_in_german is not None
+            and self.not_fluent_in_german != selector.not_fluent_in_german
+        ):
+            return False
         return not (
             isinstance(selector, Student.Selector)
             and selector.type_specific_assignment is not None
             and self.type_specific_assignment != selector.type_specific_assignment
         )
 
-    @dataclass(frozen=True)
+    @dataclass(frozen=True, kw_only=True)
     class Selector:
         course_type: CourseType | None = None
         degree_type: DegreeType | None = None
+        not_fluent_in_german: bool | None = None
         type_specific_assignment: bool | None = None
 
         @classmethod
         def from_type_selector(
             cls,
-            type_selector: TypeSelector,
+            type_selector: StudentTypeSelector,
             type_specific_assignment: bool | None = None,
         ) -> Self:
             return cls(
                 course_type=type_selector.course_type,
                 degree_type=type_selector.degree_type,
+                not_fluent_in_german=type_selector.not_fluent_in_german,
                 type_specific_assignment=type_specific_assignment,
             )
 
@@ -136,16 +144,16 @@ class Team:
 
     def num_students(
         self,
-        selector: TypeSelector
+        selector: StudentTypeSelector
         | Student.Selector
-        | Collection[TypeSelector | Student.Selector]
+        | Collection[StudentTypeSelector | Student.Selector]
         | None = None,
     ) -> int:
         if selector is None:
             return self.size
         selectors = (
             (selector,)
-            if isinstance(selector, (TypeSelector, Student.Selector))
+            if isinstance(selector, (StudentTypeSelector, Student.Selector))
             else selector
         )
         return sum(1 for s in self.students if any(s.matches(sel) for sel in selectors))
@@ -203,6 +211,7 @@ class Input:
                 name=s.name,
                 course_type=s.course_type,
                 degree_type=s.degree_type,
+                not_fluent_in_german=s.not_fluent_in_german,
                 type_specific_assignment=s.type_specific_assignment,
             )
             for sid, s in io_model.students.items()

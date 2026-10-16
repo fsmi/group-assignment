@@ -62,7 +62,8 @@ INVALID_COURSE_DEGREE_COMBINATIONS: frozenset[tuple[CourseType, DegreeType]] = (
 )
 
 
-@dataclass(frozen=True)
-class TypeSelector:
+@dataclass(frozen=True, kw_only=True)
+class StudentTypeSelector:
     course_type: CourseType | None = None
     degree_type: DegreeType | None = None
+    not_fluent_in_german: bool | None = None

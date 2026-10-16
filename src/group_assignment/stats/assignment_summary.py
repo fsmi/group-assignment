@@ -12,7 +12,7 @@ from group_assignment.datatypes import (
     INVALID_COURSE_DEGREE_COMBINATIONS,
     CourseType,
     DegreeType,
-    TypeSelector,
+    StudentTypeSelector,
 )
 from group_assignment.model import Assignment, Input, Student
 
@@ -79,7 +79,11 @@ def build_acc_scores_table(inp: Input, assignment: Assignment) -> Table:
             counts = aggregate_assignment_scores(
                 inp,
                 assignment,
-                Student.Selector(course_type, degree_type, tsa),
+                Student.Selector(
+                    course_type=course_type,
+                    degree_type=degree_type,
+                    type_specific_assignment=tsa,
+                ),
             )
             table.add_row(
                 label if i == 0 else "",
@@ -188,10 +192,12 @@ def build_same_type_assignment_table(
     def fmt(n: int) -> Text | str:
         return Text(str(n), style="red") if n > 0 else str(n)
 
-    def type_parts(selector: TypeSelector) -> tuple[str, str]:
+    def type_parts(selector: StudentTypeSelector) -> tuple[str, str, str]:
+        fluency = {None: "", True: "no german", False: "german"}
         return (
             selector.course_type.value if selector.course_type else "",
             selector.degree_type.value if selector.degree_type else "",
+            fluency[selector.not_fluent_in_german],
         )
 
     for constraint in constraints:
