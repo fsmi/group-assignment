@@ -6,6 +6,7 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
+from group_assignment.datatypes import StudentTypeSelector
 from group_assignment.model import Input
 
 from .input_stats import (
@@ -23,10 +24,20 @@ def print_input_summary(data: Input) -> None:
         "# Students",
         "Course/Degree",
     )
+    not_fluent_table = build_crosstable(
+        count_students_by_type(data, StudentTypeSelector(not_fluent_in_german=True)),
+        "# Students not fluent in German",
+        "Course/Degree",
+    )
     groups_table = _build_groups_table(data)
 
+    # student tables side by side
+    students_tables = Table.grid(padding=(0, 4))
+    students_tables.add_row(students_table, not_fluent_table)
+
     tables = Group(
-        Align.center(Padding(students_table, (1, 0, 1, 0))), Align.center(groups_table)
+        Align.center(Padding(students_tables, (1, 0, 1, 0))),
+        Align.center(groups_table),
     )
     panel = Panel(
         tables,

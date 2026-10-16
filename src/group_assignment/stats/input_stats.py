@@ -1,14 +1,24 @@
-from group_assignment.datatypes import CourseType, DegreeType, GroupID, Score
+from group_assignment.datatypes import (
+    CourseType,
+    DegreeType,
+    GroupID,
+    Score,
+    StudentTypeSelector,
+)
 from group_assignment.model import Input
 
 
-def count_students_by_type(inp: Input) -> dict[tuple[CourseType, DegreeType], int]:
+def count_students_by_type(
+    inp: Input, selector: StudentTypeSelector | None = None
+) -> dict[tuple[CourseType, DegreeType], int]:
     student_counts = {
         (course_type, degree_type): 0
         for course_type in CourseType
         for degree_type in DegreeType
     }
     for student in inp.students:
+        if selector is not None and not student.matches(selector):
+            continue
         student_counts[(student.course_type, student.degree_type)] += 1
     return student_counts
 
