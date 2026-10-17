@@ -2,7 +2,7 @@
 
 Solver for assigning students to O-Phase groups.
 
-The webapp where students sign up is a separate project and can be found [here](https://git.fsmi.org/o-phase/gruppenzuteilung_gui).
+The webapp where students sign up is a separate project and can be found [here](https://git.fsmi.org/o-phase/gruppenzuteilung-gui-rs).
 
 ## Installation
 
