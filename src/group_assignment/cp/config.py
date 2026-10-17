@@ -75,8 +75,8 @@ class Config:
         self._validate()
 
     def _validate(self) -> None:
-        if self.cost_base < 1:
-            raise ValueError(f"Config: cost_base must be >= 1 (got {self.cost_base})")
+        if self.cost_base <= 1:
+            raise ValueError(f"Config: cost_base must be > 1 (got {self.cost_base})")
         if self.non_tsa_students_factor < 1:
             raise ValueError(
                 f"Config: non_tsa_students_factor must be >= 1 "

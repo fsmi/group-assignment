@@ -9,7 +9,7 @@ class CostSchema(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     base: int = Field(gt=1)
-    non_tsa_students_factor: float = Field(gt=1)
+    non_tsa_students_factor: float = Field(ge=1)
     balance_group_sizes: bool
 
 
