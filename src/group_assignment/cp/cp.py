@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import itertools
 import logging
 import math
 import time
@@ -20,14 +21,20 @@ logger = logging.getLogger(__name__)
 class CP:
     _model: cp_model.CpModel
     _x: dict[tuple[TeamID, GroupID], cp_model.IntVar]
+    _cost: cp_model.LinearExpr
+    _fill_differences: list[tuple[cp_model.LinearExpr, int]] | None
 
     def __init__(
         self,
         model: cp_model.CpModel,
         x: dict[tuple[TeamID, GroupID], cp_model.IntVar],
+        cost: cp_model.LinearExpr,
+        fill_differences: list[tuple[cp_model.LinearExpr, int]] | None,
     ) -> None:
         self._model = model
         self._x = x
+        self._cost = cost
+        self._fill_differences = fill_differences
 
     @classmethod
     def build_from_input(cls, inp: Input, config: Config) -> Self:
@@ -129,37 +136,88 @@ class CP:
                     >= min_share.numerator * group_size
                 )
 
-        # ==== OBJECTIVE ====
+        # ==== OBJECTIVES ====
 
-        model.minimize(
-            sum(
-                x[(t.id, g.id)]
+        # primary: rating cost, scaled by the denominator of non_tsa_students_factor
+        # so that all coefficients are integers (needed to fix it in phase 2 of
+        # solve); minimized unscaled, so that the solver value is the actual cost
+        non_tsa_factor = Fraction(str(config.non_tsa_students_factor))
+        cost = cp_model.LinearExpr.weighted_sum(
+            [x[(t.id, g.id)] for t in inp.teams for g in t.rating],
+            [
+                (config.cost_base ** t.rating[g] - 1)
                 * (
-                    (config.cost_base ** t.rating[g] - 1)
-                    * (
-                        config.non_tsa_students_factor
-                        * t.num_students(
-                            Student.Selector(type_specific_assignment=False)
-                        )
-                        + t.num_students(
-                            Student.Selector(type_specific_assignment=True)
-                        )
-                    )
+                    non_tsa_factor.numerator
+                    * t.num_students(Student.Selector(type_specific_assignment=False))
+                    + non_tsa_factor.denominator
+                    * t.num_students(Student.Selector(type_specific_assignment=True))
                 )
                 for t in inp.teams
                 for g in t.rating
-            )
+            ],
         )
+        model.minimize(cost * (1 / non_tsa_factor.denominator))
 
-        return cls(model, x)
+        if not config.balance_group_sizes:
+            return cls(model, x, cost, None)
+
+        # secondary: pairwise differences of the fill ratios size/capacity,
+        # cross-multiplied to stay integer:
+        # c_h * s_g - c_g * s_h = c_g * c_h * (s_g/c_g - s_h/c_h),
+        # each with an upper bound of its absolute value
+        group_size = {
+            g.id: cp_model.LinearExpr.weighted_sum(
+                [x[(t.id, g.id)] for t in inp.teams if g in t.rating],
+                [t.size for t in inp.teams if g in t.rating],
+            )
+            for g in inp.groups
+        }
+        max_group_size = {
+            g.id: math.floor(g.capacity * config.group_size.capacity_factor)
+            for g in inp.groups
+        }
+        fill_differences = [
+            (
+                h.capacity * group_size[g.id] - g.capacity * group_size[h.id],
+                max(
+                    h.capacity * max_group_size[g.id],
+                    g.capacity * max_group_size[h.id],
+                ),
+            )
+            for g, h in itertools.combinations(inp.groups, 2)
+        ]
+
+        return cls(model, x, cost, fill_differences)
 
     def solve(self) -> Mapping[TeamID, GroupID]:
-        logger.info("Solving CP")
-
         solver = cp_model.CpSolver()
         # deterministic behavior
         solver.parameters.random_seed = 42
 
+        # phase 1: minimize the rating cost
+        logger.info("Solving CP, phase 1: rating cost")
+        self._solve(solver)
+        if self._fill_differences is None:
+            return self._get_assignment(solver)
+
+        # phase 2: minimize the sum of absolute fill differences without worsening
+        # the rating cost, starting from the phase 1 solution
+        # (the absolute values are only added here, since they slow down phase 1)
+        logger.info("Solving CP, phase 2: group size balance")
+        self._model.add(self._cost <= solver.value(self._cost))
+        for var in self._x.values():
+            self._model.add_hint(var, solver.value(var))
+        imbalances = []
+        for diff, ub in self._fill_differences:
+            imbalance = self._model.new_int_var(0, ub, "imbalance")
+            self._model.add_abs_equality(imbalance, diff)
+            imbalances.append(imbalance)
+        self._model.minimize(cp_model.LinearExpr.sum(*imbalances))
+        self._solve(solver)
+
+        return self._get_assignment(solver)
+
+    def _solve(self, solver: cp_model.CpSolver) -> None:
         start_time = time.time()
         status = solver.solve(self._model)
         end_time = time.time()
@@ -175,8 +233,6 @@ class CP:
             "FEASIBLE",
         }:
             raise RuntimeError("No feasible solution found")
-
-        return self._get_assignment(solver)
 
     def _get_assignment(self, solver: cp_model.CpSolver) -> Mapping[TeamID, GroupID]:
         assignment: dict[TeamID, GroupID] = {}

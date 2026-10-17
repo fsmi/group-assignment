@@ -1,6 +1,7 @@
 [cost]
 base = 3                      # cost of score s: base^s - 1
 non_tsa_students_factor = 1.5 # weight of non-TSA students
+balance_group_sizes = false   # balance fill ratios without worsening the cost
 
 [constraints]
 # TSA students get >= min students of their types in their group

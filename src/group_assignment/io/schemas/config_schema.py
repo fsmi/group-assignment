@@ -10,6 +10,7 @@ class CostSchema(BaseModel):
 
     base: int = Field(gt=1)
     non_tsa_students_factor: float = Field(gt=1)
+    balance_group_sizes: bool
 
 
 class MinNumStudentsSchema(BaseModel):
@@ -68,6 +69,7 @@ class ConfigSchema(BaseModel):
         return Config(
             cost_base=self.cost.base,
             non_tsa_students_factor=self.cost.non_tsa_students_factor,
+            balance_group_sizes=self.cost.balance_group_sizes,
             min_num_students_tsa=tuple(
                 e.to_config() for e in self.constraints.min_num_students_tsa
             ),
