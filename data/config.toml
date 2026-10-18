@@ -1,0 +1,52 @@
+[cost]
+base = 4                    # cost of score s: base^s - 1
+non_tsa_students_factor = 2 # weight of non-TSA students
+balance_group_sizes = false # balance fill ratios without worsening the cost
+
+[constraints]
+# TSA students get >= min students of their types in their group
+min_num_students_tsa = [
+    # course type + degree type
+    { types = [{ course_type = "info", degree_type = "bachelor" }], min = 0 },
+    { types = [{ course_type = "info", degree_type = "master" }], min = 0 },
+    { types = [{ course_type = "compsci", degree_type = "master" }], min = 0 },
+    { types = [{ course_type = "info", degree_type = "master" }, { course_type = "compsci", degree_type = "master" }], min = 0 },
+    { types = [{ course_type = "mathe", degree_type = "bachelor" }], min = 0 },
+    { types = [{ course_type = "mathe", degree_type = "master" }], min = 0 },
+    { types = [{ course_type = "cds", degree_type = "bachelor" }], min = 0 },
+    { types = [{ course_type = "cds", degree_type = "master" }], min = 0 },
+    { types = [{ course_type = "lehramt", degree_type = "bachelor" }], min = 0 },
+    { types = [{ course_type = "lehramt", degree_type = "master" }], min = 0 },
+    # degree type only
+    { types = [{ degree_type = "bachelor" }], min = 0 },
+    { types = [{ degree_type = "master" }], min = 0 },
+    # not fluent in german
+    { types = [{ not_fluent_in_german = true }], min = 0 },
+    #{ types = [{ course_type = "mathe", degree_type = "master", not_fluent_in_german = true }], min = 0 },
+    #{ types = [{ course_type = "cds", degree_type = "master", not_fluent_in_german = true }], min = 0 },
+]
+# all students get >= min students of their types in their group
+min_num_students_all = [
+    { types = [{ not_fluent_in_german = true }], min = 0 },
+    { types = [{ degree_type = "bachelor" }], min = 0 },
+    { types = [{ degree_type = "master" }], min = 0 },
+    # { types = [{ course_type = "info", degree_type = "bachelor" }], min = 0 },
+    # { types = [{ course_type = "info", degree_type = "master" }, { course_type = "compsci", degree_type = "master" }], min = 0 },
+    # { types = [{ course_type = "mathe", degree_type = "bachelor" }], min = 0 },
+    # { types = [{ course_type = "mathe", degree_type = "master" }], min = 0 },
+    # { types = [{ course_type = "cds", degree_type = "bachelor" }], min = 0 },
+    # { types = [{ course_type = "cds", degree_type = "master" }], min = 0 },
+    # { types = [{ course_type = "lehramt", degree_type = "bachelor" }], min = 0 },
+    # { types = [{ course_type = "lehramt", degree_type = "master" }], min = 0 },
+]
+# min share of students of a degree type in each group accepting it
+min_degree_type_shares = [
+    { degree_type = "bachelor", min = 0.0 },
+    { degree_type = "master", min = 0.0 },
+]
+
+[constraints.group_size]
+min_factor = 1.0          # scales min size from input
+min_size = 0              # absolute min size
+min_capacity_factor = 0.0 # min size as share of capacity
+capacity_factor = 1.0     # scales capacity
