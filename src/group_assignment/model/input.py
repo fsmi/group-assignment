@@ -45,6 +45,16 @@ class Group:
                 f"(got capacity={self.capacity}, min_size={self.min_size})"
             )
 
+    def accepts(self, selector: StudentTypeSelector) -> bool:
+        # groups do not restrict fluency in German
+        return (
+            selector.course_type is None
+            or self.course_type.accepts(selector.course_type)
+        ) and (
+            selector.degree_type is None
+            or self.degree_type.accepts(selector.degree_type)
+        )
+
 
 @dataclass(frozen=True)
 class Student:

@@ -1,8 +1,8 @@
 from pydantic import BaseModel, ConfigDict, Field
 
 from group_assignment.cp import Config
-from group_assignment.cp.config import GroupSize, MinDegreeTypeShare, MinNumStudents
-from group_assignment.datatypes import DegreeType, StudentTypeSelector
+from group_assignment.cp.config import GroupSize, MinNumStudents, MinTypeShare
+from group_assignment.datatypes import StudentTypeSelector
 
 
 class CostSchema(BaseModel):
@@ -23,14 +23,14 @@ class MinNumStudentsSchema(BaseModel):
         return MinNumStudents(types=self.types, min=self.min)
 
 
-class MinDegreeTypeShareSchema(BaseModel):
+class MinTypeShareSchema(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    degree_type: DegreeType
+    types: frozenset[StudentTypeSelector] = Field(min_length=1)
     min: float = Field(ge=0, le=1)
 
-    def to_config(self) -> MinDegreeTypeShare:
-        return MinDegreeTypeShare(degree_type=self.degree_type, min=self.min)
+    def to_config(self) -> MinTypeShare:
+        return MinTypeShare(types=self.types, min=self.min)
 
 
 class GroupSizeSchema(BaseModel):
@@ -55,7 +55,7 @@ class ConstraintsSchema(BaseModel):
 
     min_num_students_tsa: list[MinNumStudentsSchema]
     min_num_students_all: list[MinNumStudentsSchema]
-    min_degree_type_shares: list[MinDegreeTypeShareSchema]
+    min_type_shares: list[MinTypeShareSchema]
     group_size: GroupSizeSchema
 
 
@@ -76,8 +76,8 @@ class ConfigSchema(BaseModel):
             min_num_students_all=tuple(
                 e.to_config() for e in self.constraints.min_num_students_all
             ),
-            min_degree_type_shares=tuple(
-                e.to_config() for e in self.constraints.min_degree_type_shares
+            min_type_shares=tuple(
+                e.to_config() for e in self.constraints.min_type_shares
             ),
             group_size=self.constraints.group_size.to_config(),
         )

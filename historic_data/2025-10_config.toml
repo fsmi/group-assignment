@@ -27,10 +27,10 @@ min_num_students_tsa = [
 ]
 # all students get >= min students of their types in their group
 min_num_students_all = []
-# min share of students of a degree type in each group accepting it
-min_degree_type_shares = [
-  { degree_type = "bachelor", min = 0.0 },
-  { degree_type = "master", min = 0.0 },
+# min share of students of their types in each group accepting any of them
+min_type_shares = [
+  { types = [{ degree_type = "bachelor" }], min = 0.0 },
+  { types = [{ degree_type = "master" }], min = 0.0 },
 ]
 
 [constraints.group_size]

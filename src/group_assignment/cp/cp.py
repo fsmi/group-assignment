@@ -115,24 +115,23 @@ class CP:
         for constraint in config.min_num_students_all:
             add_min_num_students(constraint, constraint.types)
 
-        # minimum share of students of each degree type in each group that accepts
-        # this degree type
-        for constraint in config.min_degree_type_shares:
+        # minimum share of students of each set of types in each group that accepts
+        # any of these types
+        for constraint in config.min_type_shares:
             min_share = Fraction(str(constraint.min))
-            selector = StudentTypeSelector(degree_type=constraint.degree_type)
             for g in inp.groups:
-                if not g.degree_type.accepts(constraint.degree_type):
+                if not any(g.accepts(selector) for selector in constraint.types):
                     continue
                 group_size = sum(
                     t.size * x[(t.id, g.id)] for t in inp.teams if g in t.rating
                 )
-                count_of_degree_type = sum(
-                    x[(t.id, g.id)] * t.num_students(selector)
+                count_of_types = sum(
+                    x[(t.id, g.id)] * t.num_students(constraint.types)
                     for t in inp.teams
                     if g in t.rating
                 )
                 model.add(
-                    min_share.denominator * count_of_degree_type
+                    min_share.denominator * count_of_types
                     >= min_share.numerator * group_size
                 )
 
