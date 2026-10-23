@@ -64,6 +64,9 @@ select = [
 ]
 ignore = ["TRY003"]
 
+[tool.ruff.lint.per-file-ignores]
+"scripts/*" = ["INP001"]
+
 [tool.pyrefly]
 preset = "strict"
 treat-all-caps-as-final = true

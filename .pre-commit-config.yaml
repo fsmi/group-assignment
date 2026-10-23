@@ -38,3 +38,12 @@ repos:
       - id: pyrefly-check
         pass_filenames: false
         language: system
+
+  - repo: local
+    hooks:
+      - id: check-students-anonymized
+        name: check students are anonymized
+        entry: python scripts/check_students_anonymized.py
+        language: python
+        types: [json]
+        exclude: ^\.vscode/
