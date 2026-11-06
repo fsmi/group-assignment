@@ -15,7 +15,9 @@ Data from past years.
 - [2025-10_input.json](2025-10_input.json)
   - One student had `compsci` `bachelor`, which was not a valid course/degree combination at the time -> set to `master`
 - [2025-10_assignment.json](2025-10_assignment.json)
-  - Not exactly reproducible with the current codebase because of a solver version mismatch
+  - Not exactly reproducible, because the solver was not deterministic at the time
+- [2026-10_assignment.json](2026-10_assignment.json)
+  - Not exactly reproducible, because the solver was not deterministic at the time
 
 ## Anonymize Input File
 
