@@ -190,8 +190,10 @@ class CP:
 
     def solve(self) -> Mapping[TeamID, GroupID]:
         solver = cp_model.CpSolver()
-        # deterministic behavior
+        # deterministic behavior (interleave_search makes the parallel workers
+        # deterministic, the seed alone does not)
         solver.parameters.random_seed = 42
+        solver.parameters.interleave_search = True
 
         # phase 1: minimize the rating cost
         logger.info("Solving CP, phase 1: rating cost")
